@@ -30,5 +30,8 @@ void cjson_setValue(cjson_t *cj, cjson_valueType type, void *value);
 void cjson_setName(cjson_t *cj, char *name);
 void cjson_create(cjson_t *cj, cjson_valueType type, char *name, void *value);
 void cjson_print(cjson_t *cj, uint32_t indentSize, uint32_t indent);
+void cjson_destroy(cjson_t *cj);
+int cjson_add(cjson_t *parent, cjson_t* child);
+int cjson_remove(cjson_t *parent);
 
 #endif

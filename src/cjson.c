@@ -30,6 +30,7 @@ void cjson_setValue(cjson_t *cj, cjson_valueType type, void *value) {
                 free(cjValue->v_cj);
             }
             cjValue->v_cj = calloc(cj->value_size, sizeof(cjson_t));
+            *cjValue->v_cj = *(cjson_t*) value;
             break;
         }
     }
@@ -46,6 +47,7 @@ void cjson_setName(cjson_t *cj, char *name) {
 }
 
 void cjson_create(cjson_t *cj, cjson_valueType type, char *name, void *value) {
+    cj->value.v_cj = NULL;
     cjson_setValue(cj, type, value);
     cjson_setName(cj, name);
 }
@@ -57,15 +59,15 @@ void cjson_print(cjson_t *cj, uint32_t indentSize, uint32_t indent) {
     }
     switch (cj->vType) {
         case CJ_INT: {
-            printf("%d", cj->value.v_int);
+            printf("%d\n", cj->value.v_int);
             break;
         }
         case CJ_FLT: {
-            printf("%f", cj->value.v_flt);
+            printf("%f\n", cj->value.v_flt);
             break;
         }
         case CJ_STR: {
-            printf("\"%s\"", cj->value.v_str);
+            printf("\"%s\"\n", cj->value.v_str);
             break;
         }
         case CJ_O: {
@@ -77,5 +79,35 @@ void cjson_print(cjson_t *cj, uint32_t indentSize, uint32_t indent) {
             indentLn(indentSize, indent);
             printf("}\n");
         }
+    }
+}
+
+void cjson_destroy(cjson_t *cj) {
+    if (cj->vType == CJ_O || cj->vType == CJ_O_ARR) {
+        for (size_t i = 0; i < cj->value_count; i++) {
+            cjson_destroy(cj->value.v_cj + i);
+        }
+        free(cj->value.v_cj);
+    }
+}
+
+int cjson_add(cjson_t *parent, cjson_t* child) {
+    if (parent->vType != CJ_O && parent->vType != CJ_O_ARR) return -1;
+    if (parent->value_count == parent->value_size) {
+        parent->value_size += 2;
+        parent->value.v_cj = realloc(parent->value.v_cj, parent->value_size * sizeof(cjson_t));
+    }
+    parent->value.v_cj[parent->value_count++] = *child;
+    return 0;
+}
+
+int cjson_remove(cjson_t *parent) {
+    if (parent->vType != CJ_O && parent->vType != CJ_O_ARR) return -1;
+    if (parent->value_count == 0) return -1;
+    parent->value_count--;
+    cjson_destroy(parent->value.v_cj + parent->value_count);
+    if (parent->value_count % 2 == 0) {
+        parent->value_size -= 2;
+        parent->value.v_cj = realloc(parent->value.v_cj, parent->value_size * sizeof(cjson_t));
     }
 }
