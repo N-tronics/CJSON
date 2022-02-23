@@ -13,9 +13,10 @@ CFLAGS=-I$(INCLUDE_DIR)
 RUNFLAGS=$(CURDIR)/tests/data.json
 DEPS=$(SRC) $(HDR)
 
-.PHONY: all clean
+.PHONY: clean
 
-all: dirs $(TGT)
+build: dirs $(TGT)
+	@echo Successfully built \'$(TGT)\'
 
 dirs: $(DEPS)
 	@if [ ! -d $(OBJ_DIR) ]; then mkdir -pv ./$(OBJ_DIR)/src; fi
@@ -26,7 +27,7 @@ $(TGT): $(OBJ)
 $(OBJ_DIR)/src/%.o: $(SRC_DIR)/%.c $(HDR)
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-run: all
+run: build
 	@echo
 	./$(TGT) $(RUNFLAGS)
 
