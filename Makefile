@@ -3,7 +3,7 @@ HDR_DIR=include
 SRC_DIR=src
 OBJ_DIR=$(BUILD_DIR)/obj
 TGT=$(BUILD_DIR)/cjson
-BUILD_TGT=$(BUILD_DIR)/dist/cjson.a
+BUILD_TGT=$(BUILD_DIR)/dist/cjson.o
 USER_TEST=$(BUILD_DIR)/usertest
 
 HDR=$(wildcard $(HDR_DIR)/*.h)
@@ -24,7 +24,7 @@ CLR_END:=\e[m
 $(BUILD_TGT): $(OBJ)
 	@echo -e "$(ORNG)Building '$(BUILD_TGT)'...$(CLR_END)"
 	@if [ ! -d $(BUILD_DIR)/dist ]; then mkdir -pv ./$(BUILD_DIR)/dist; fi
-	ar cr $(BUILD_TGT) $(OBJ)
+	ld -r $(OBJ) -o $(BUILD_TGT)
 	@echo -e "$(GRN)Successfully built '$(BUILD_TGT)'$(CLR_END)"
 
 $(TGT): $(OBJ) $(OBJ_DIR)/src/main.o
