@@ -23,14 +23,16 @@ void cjson_setValue(cjson_t *cj, cjson_valueType type, void *value) {
             break;
         }
         case CJ_O: case CJ_O_ARR: {
-            cj->value_count = 1;
-            cj->value_size = 2;
             if (cjValue->v_cj != NULL) {
-                // TODO: Destroy cjson_t instead of free
+                for (int i = 0; i < cj->value_count; i++) {
+                    cjson_destroy(cjValue->v_cj + i);
+                }
                 free(cjValue->v_cj);
             }
+            cj->value_count = 0;
+            cj->value_size = 2;
             cjValue->v_cj = calloc(cj->value_size, sizeof(cjson_t));
-            *cjValue->v_cj = *(cjson_t*) value;
+            cjson_add(cj, (cjson_t*)value);
             break;
         }
     }
@@ -93,6 +95,10 @@ void cjson_destroy(cjson_t *cj) {
 
 int cjson_add(cjson_t *parent, cjson_t* child) {
     if (parent->vType != CJ_O && parent->vType != CJ_O_ARR) return -1;
+    if (
+        (parent->vType == CJ_O && child->name[0] == 0) ||
+        (parent->vType == CJ_O_ARR && child->name[0] != 0)
+    ) return -1;
     if (parent->value_count == parent->value_size) {
         parent->value_size += 2;
         parent->value.v_cj = realloc(parent->value.v_cj, parent->value_size * sizeof(cjson_t));
@@ -104,10 +110,10 @@ int cjson_add(cjson_t *parent, cjson_t* child) {
 int cjson_remove(cjson_t *parent) {
     if (parent->vType != CJ_O && parent->vType != CJ_O_ARR) return -1;
     if (parent->value_count == 0) return -1;
-    parent->value_count--;
-    cjson_destroy(parent->value.v_cj + parent->value_count);
-    if (parent->value_count % 2 == 0) {
+    cjson_destroy(parent->value.v_cj + parent->value_count - 1);
+    if ((parent->value_count - 1) % 2 == 0) {
         parent->value_size -= 2;
         parent->value.v_cj = realloc(parent->value.v_cj, parent->value_size * sizeof(cjson_t));
     }
+    parent->value_count--;
 }

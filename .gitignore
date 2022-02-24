@@ -2,5 +2,8 @@
 !*.*
 !*/
 
+tests/*
+!tests/*.json
+
 build/
 .vscode/

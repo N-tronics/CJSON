@@ -27,12 +27,17 @@ int main(int argc, char **argv) {
     // fclose(jsonFile);
 
     // printf("%s\n", fileBuffer);
-    cjson_t rt, v1, v2;
+    cjson_t rt, v1, v2, v3;
     int x = 15;
+    float f = 1.5;
+    cjson_create(&v3, CJ_FLT, "height", &f);
     cjson_create(&v2, CJ_INT, "age", &x);
     cjson_create(&v1, CJ_STR, "name", "NISCHAY");
     cjson_create(&rt, CJ_O, NULL, &v1);
     cjson_add(&rt, &v2);
+    cjson_add(&rt, &v3);
+    cjson_print(&rt, 4, 0);
+    cjson_remove(&rt);
     cjson_print(&rt, 4, 0);
     cjson_remove(&rt);
     cjson_print(&rt, 4, 0);
